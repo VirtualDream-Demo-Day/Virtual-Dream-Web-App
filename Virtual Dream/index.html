@@ -107,23 +107,19 @@
   .tip-title { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
   .tip-text { font-family: 'Cormorant Garamond', serif; font-size: 16px; line-height: 1.7; color: var(--silver); }
 
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(123,94,167,0.2);
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 0 20px;
-  z-index: 1000;
-}
-
-
-
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(123,94,167,0.2);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0 20px;
+    z-index: 1000;
+  }
 
   .bnav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; color: var(--silver); font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px; cursor: pointer; opacity: 0.4; transition: all 0.3s; padding: 4px 16px; }
   .bnav-btn.active { opacity: 1; color: var(--gold); }
@@ -135,9 +131,7 @@
   .error-msg { background: rgba(180,60,80,0.15); border: 1px solid rgba(180,60,80,0.3); border-radius: 12px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #e89aab; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
 
-
 </style>
-
 
 </head>
 
@@ -155,15 +149,6 @@
   <div class="header">
     <div class="logo-icon">
       <img src="logo_virtualdream.png" alt="logo virtual dream" style="width:360px; height:360px; object-fit:contain;">
-
-
-        <circle cx="28" cy="28" r="27" stroke="rgba(123,94,167,0.4)" stroke-width="1"/>
-        <path d="M28 8 C18 8, 10 16, 10 26 C10 36, 18 44, 28 44 C24 38, 22 32, 24 26 C26 20, 32 16, 38 16 C34 11, 31 8, 28 8Z" fill="rgba(200,191,224,0.9)"/>
-        <circle cx="36" cy="20" r="2" fill="rgba(212,168,66,0.8)"/>
-        <circle cx="40" cy="28" r="1.5" fill="rgba(212,168,66,0.5)"/>
-        <circle cx="35" cy="34" r="1" fill="rgba(212,168,66,0.4)"/>
-      </svg>
-
     </div>
     <div class="logo-title">Virtual Dream</div>
     <div class="logo-sub">Onde os seus sonhos ganham vida.</div>
@@ -190,14 +175,13 @@
       </div>
     </div>
 
-<div class="card">
-  <div class="card-label">✦ Escola de Interpretação</div>
-  <div class="moods" id="vertente-btns">
-    <button class="mood-chip selected" data-vertente="junguiana">🔮 Junguiana</button>
-    <button class="mood-chip" data-vertente="freudiana">🛋️ Freudiana</button>
-  </div>
-</div>
-
+    <div class="card">
+      <div class="card-label">✦ Escola de Interpretação</div>
+      <div class="moods" id="vertente-btns">
+        <button class="mood-chip selected" data-vertente="junguiana">🔮 Junguiana</button>
+        <button class="mood-chip" data-vertente="freudiana">🛋️ Freudiana</button>
+      </div>
+    </div>
 
     <button class="btn-interpret" id="btn-interpret" onclick="interpretDream()">
       ✦ REVELAR OS SIGNIFICADOS ✦
@@ -309,10 +293,8 @@
   </button>
 </div>
 
-
 <script>
 
-// ─── Estrelas ─────────────────────────────────────────────────
 (function createStars() {
   const container = document.getElementById('stars');
   for (let i = 0; i < 120; i++) {
@@ -331,25 +313,11 @@
   }
 })();
 
-// ─── Config da API ────────────────────────────────────────────
 const API_BASE = 'https://virtual-dream-backend.onrender.com';
 
-// Token temporário até o login ser implementado.
-// Quando tiver Firebase Auth, troque por: await firebase.auth().currentUser.getIdToken()
-const TEMP_TOKEN = 'COLE_SEU_TOKEN_AQUI';
-
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${TEMP_TOKEN}`
-  };
-}
-
-// ─── Estado ───────────────────────────────────────────────────
 let selectedMood = '';
 let selectedVertente = 'junguiana';
 
-// ─── Seleção de humor ─────────────────────────────────────────
 document.querySelectorAll('.mood-chip[data-mood]').forEach(btn => {
   btn.addEventListener('click', function () {
     document.querySelectorAll('.mood-chip[data-mood]').forEach(b => b.classList.remove('selected'));
@@ -358,7 +326,6 @@ document.querySelectorAll('.mood-chip[data-mood]').forEach(btn => {
   });
 });
 
-// ─── Seleção de vertente ──────────────────────────────────────
 document.querySelectorAll('.mood-chip[data-vertente]').forEach(btn => {
   btn.addEventListener('click', function () {
     document.querySelectorAll('.mood-chip[data-vertente]').forEach(b => b.classList.remove('selected'));
@@ -367,7 +334,6 @@ document.querySelectorAll('.mood-chip[data-vertente]').forEach(btn => {
   });
 });
 
-// ─── Navegação ────────────────────────────────────────────────
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
@@ -376,7 +342,6 @@ function showPage(id, btn) {
   if (id === 'diary') renderDiary();
 }
 
-// ─── Loading ──────────────────────────────────────────────────
 const loadingMessages = [
   'Consultando os astros...',
   'Decifrando os símbolos oníricos...',
@@ -403,7 +368,6 @@ function stopLoading() {
   document.getElementById('btn-interpret').disabled = false;
 }
 
-// ─── Interpretação ────────────────────────────────────────────
 async function interpretDream() {
   const input = document.getElementById('dream-input').value.trim();
   if (!input || input.length < 20) {
@@ -414,28 +378,14 @@ async function interpretDream() {
   startLoading();
 
   try {
-    // Passo 1: criar o sonho
-    const createRes = await fetch(`${API_BASE}/dreams`, {
+    const interpretRes = await fetch(`${API_BASE}/public/interpret`, {
       method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ text: input })
-    });
-
-    if (!createRes.ok) {
-      const err = await createRes.json().catch(() => ({}));
-      throw new Error(err.detail || `Erro ao criar sonho (${createRes.status})`);
-    }
-
-    const dream = await createRes.json();
-    const dreamId = dream.id ?? dream._id;
-
-    // Passo 2: interpretar
-    const interpretRes = await fetch(`${API_BASE}/dreams/${dreamId}/interpret`, {
-      method: 'POST',
-      headers: authHeaders(),
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        vertente: selectedVertente,
-        length: 'medium'   // pode virar opção futuramente
+        dream_text: input,
+        vertente: selectedVertente
       })
     });
 
@@ -444,15 +394,32 @@ async function interpretDream() {
       throw new Error(err.detail || `Erro na interpretação (${interpretRes.status})`);
     }
 
-    const interpreted = await interpretRes.json();
-
-    // Pega o conteúdo da interpretação mais recente
-    const interpretations = interpreted.interpretations ?? [];
-    const latest = interpretations[interpretations.length - 1];
-    const text = latest?.content ?? 'Interpretação indisponível.';
+    const result = await interpretRes.json();
 
     stopLoading();
-    renderResult(text, input, dreamId, interpreted);
+
+    document.getElementById('result-text').textContent = result.content;
+
+    const symbols = {
+      Sereno:'🌸', Ansioso:'🌊', Assustado:'⚡', Maravilhado:'✨',
+      Triste:'🌧️', Confuso:'🌀', Feliz:'🌞', Neutro:'🌙'
+    };
+    document.getElementById('result-symbol').textContent = symbols[selectedMood] || '🌙';
+
+    const tags = extractTags(input);
+    document.getElementById('result-meta').innerHTML =
+      tags.map(t => `<span class="meta-tag">${t}</span>`).join('');
+
+    document.getElementById('result-card').classList.add('show');
+    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    window.lastInterpretation = {
+      dream: input,
+      mood: selectedMood,
+      vertente: selectedVertente,
+      result: result.content,
+      date: new Date()
+    };
 
   } catch (err) {
     stopLoading();
@@ -461,8 +428,7 @@ async function interpretDream() {
   }
 }
 
-// ─── Renderizar resultado ─────────────────────────────────────
-function renderResult(text, input, dreamId, dreamObj) {
+function renderResult(text, input) {
   document.getElementById('result-text').textContent = text;
 
   const symbols = {
@@ -477,18 +443,8 @@ function renderResult(text, input, dreamId, dreamObj) {
 
   document.getElementById('result-card').classList.add('show');
   document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  window.lastInterpretation = {
-    dream: input,
-    mood: selectedMood,
-    vertente: selectedVertente,
-    result: text,
-    date: new Date(),
-    dreamId
-  };
 }
 
-// ─── Tags automáticas ─────────────────────────────────────────
 function extractTags(text) {
   const keywords = [
     ['voar','✈️ Voo'], ['água','💧 Água'], ['mar','🌊 Mar'], ['rio','💧 Rio'],
@@ -510,14 +466,12 @@ function extractTags(text) {
   return found.slice(0, 5);
 }
 
-// ─── Erro ─────────────────────────────────────────────────────
 function showError(msg) {
   const el = document.getElementById('error-msg');
   el.textContent = msg;
   el.classList.add('show');
 }
 
-// ─── Diário ───────────────────────────────────────────────────
 function saveDream() {
   if (!window.lastInterpretation) return;
   const dreams = JSON.parse(localStorage.getItem('morpheus-dreams') || '[]');
@@ -586,28 +540,9 @@ function showEntry(i) {
   document.getElementById('result-card').classList.add('show');
   showPage('interpret', document.querySelector('.bnav-btn'));
 }
-   
 
-
-
-
-
-
-
-
-
-
-
-  </script>
-
-
-
-
+</script>
 
 </body>
-
-
-
-
 
 </html>
