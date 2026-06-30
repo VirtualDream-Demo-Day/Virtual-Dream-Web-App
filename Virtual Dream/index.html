@@ -64,9 +64,9 @@
   textarea::placeholder { color: rgba(200,191,224,0.3); font-style: italic; }
   textarea:focus { border-color: rgba(123,94,167,0.5); }
 
-  .moods { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .mood-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(200,191,224,0.2); background: transparent; color: var(--silver); font-size: 12px; cursor: pointer; transition: all 0.25s; font-family: 'Lato', sans-serif; }
-  .mood-chip.selected, .mood-chip:hover { border-color: var(--glow); background: rgba(123,94,167,0.2); color: var(--pale); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(200,191,224,0.2); background: transparent; color: var(--silver); font-size: 12px; cursor: pointer; transition: all 0.25s; font-family: 'Lato', sans-serif; }
+  .chip.selected, .chip:hover { border-color: var(--glow); background: rgba(123,94,167,0.2); color: var(--pale); }
 
   .btn-interpret { width: 100%; padding: 18px; background: linear-gradient(135deg, #5a3d8a 0%, #8b5e9b 50%, #5a3d8a 100%); background-size: 200% 100%; border: none; border-radius: 18px; color: white; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px; cursor: pointer; transition: all 0.4s; position: relative; overflow: hidden; margin-top: 4px; box-shadow: 0 8px 32px rgba(123,94,167,0.3); }
   .btn-interpret:hover { background-position: right; box-shadow: 0 12px 40px rgba(123,94,167,0.5); }
@@ -100,27 +100,14 @@
   .dream-entry:hover { border-color: rgba(123,94,167,0.5); transform: translateY(-2px); }
   .entry-date { font-size: 10px; color: var(--gold); letter-spacing: 2px; font-family: 'Cinzel', serif; margin-bottom: 6px; }
   .entry-preview { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: var(--silver); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .entry-mood { font-size: 18px; position: absolute; top: 16px; right: 16px; }
+  .entry-vertente { font-size: 18px; position: absolute; top: 16px; right: 16px; }
 
   .tip-card { background: linear-gradient(135deg, rgba(26,19,48,0.8), rgba(10,8,18,0.8)); border: 1px solid rgba(123,94,167,0.2); border-radius: 20px; padding: 20px; margin-bottom: 12px; }
   .tip-icon { font-size: 28px; margin-bottom: 10px; }
   .tip-title { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
   .tip-text { font-family: 'Cormorant Garamond', serif; font-size: 16px; line-height: 1.7; color: var(--silver); }
 
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(123,94,167,0.2);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 0 20px;
-    z-index: 1000;
-  }
-
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; backdrop-filter: blur(20px); border-top: 1px solid rgba(123,94,167,0.2); display: flex; justify-content: space-around; padding: 12px 0 20px; z-index: 1000; }
   .bnav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: none; color: var(--silver); font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1px; cursor: pointer; opacity: 0.4; transition: all 0.3s; padding: 4px 16px; }
   .bnav-btn.active { opacity: 1; color: var(--gold); }
   .bnav-btn svg { width: 22px; height: 22px; }
@@ -130,14 +117,11 @@
 
   .error-msg { background: rgba(180,60,80,0.15); border: 1px solid rgba(180,60,80,0.3); border-radius: 12px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #e89aab; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
-
 </style>
-
 </head>
 
 <body>
 
-<!-- Stars e névoas de fundo -->
 <div class="stars" id="stars"></div>
 <div class="nebula nebula-1"></div>
 <div class="nebula nebula-2"></div>
@@ -145,7 +129,6 @@
 
 <div class="phone">
 
-  <!-- Cabeçalho -->
   <div class="header">
     <div class="logo-icon">
       <img src="logo_virtualdream.png" alt="logo virtual dream" style="width:360px; height:360px; object-fit:contain;">
@@ -162,24 +145,11 @@
     </div>
 
     <div class="card">
-      <div class="card-label">✦ Como você acordou?</div>
-      <div class="moods">
-        <button class="mood-chip" data-mood="Sereno">😌 Sereno</button>
-        <button class="mood-chip" data-mood="Ansioso">😰 Ansioso</button>
-        <button class="mood-chip" data-mood="Assustado">😨 Assustado</button>
-        <button class="mood-chip" data-mood="Maravilhado">🤩 Maravilhado</button>
-        <button class="mood-chip" data-mood="Triste">😢 Triste</button>
-        <button class="mood-chip" data-mood="Confuso">😵 Confuso</button>
-        <button class="mood-chip" data-mood="Feliz">😊 Feliz</button>
-        <button class="mood-chip" data-mood="Neutro">😶 Neutro</button>
-      </div>
-    </div>
-
-    <div class="card">
       <div class="card-label">✦ Escola de Interpretação</div>
-      <div class="moods" id="vertente-btns">
-        <button class="mood-chip selected" data-vertente="junguiana">🔮 Junguiana</button>
-        <button class="mood-chip" data-vertente="freudiana">🛋️ Freudiana</button>
+      <div class="chips" id="vertente-btns">
+        <button class="chip selected" data-vertente="jung">🔮 Junguiana</button>
+        <button class="chip" data-vertente="freud">🛋️ Freudiana</button>
+        <button class="chip" data-vertente="esoterismo">🌙 Esotérica</button>
       </div>
     </div>
 
@@ -189,7 +159,6 @@
 
     <div class="error-msg" id="error-msg"></div>
 
-    <!-- Loading -->
     <div class="loading" id="loading">
       <div class="moon-loader">
         <svg viewBox="0 0 60 60" fill="none">
@@ -203,7 +172,6 @@
       <div class="loading-text" id="loading-text">Consultando os astros...</div>
     </div>
 
-    <!-- Resultado -->
     <div class="result-card card" id="result-card">
       <div class="result-header">
         <div class="result-symbol" id="result-symbol">🌙</div>
@@ -226,37 +194,31 @@
   <!-- PÁGINA: Dicas -->
   <div class="page" id="page-tips">
     <div class="section-title">✦ Arte de Sonhar</div>
-
     <div class="tip-card">
       <div class="tip-icon">📓</div>
       <div class="tip-title">DIÁRIO JUNTO À CAMA</div>
       <div class="tip-text">Mantenha um caderno ou este app ao alcance. Nos primeiros minutos ao acordar sua memória onírica é mais vívida. Anote antes mesmo de se levantar.</div>
     </div>
-
     <div class="tip-card">
       <div class="tip-icon">🕯️</div>
       <div class="tip-title">RITUAL NOTURNO</div>
       <div class="tip-text">Antes de dormir, diga a si mesmo: "Vou me lembrar dos meus sonhos." Essa intenção consciente ativa a memória onírica. Evite telas 30 minutos antes.</div>
     </div>
-
     <div class="tip-card">
       <div class="tip-icon">🌀</div>
       <div class="tip-title">SÍMBOLOS RECORRENTES</div>
       <div class="tip-text">Preste atenção a símbolos que se repetem. Água representa o inconsciente. Voar simboliza liberdade ou fuga. Casas refletem o self.</div>
     </div>
-
     <div class="tip-card">
       <div class="tip-icon">🌒</div>
       <div class="tip-title">SONHOS LÚCIDOS</div>
       <div class="tip-text">Para ganhar consciência no sonho, faça "reality checks" ao longo do dia: olhe suas mãos e conte os dedos. Esse hábito se transfere para o sonho.</div>
     </div>
-
     <div class="tip-card">
       <div class="tip-icon">⚗️</div>
       <div class="tip-title">ALIMENTOS E SONHOS</div>
       <div class="tip-text">Queijo, nozes e banana rica em triptofano intensificam sonhos. Evite álcool — ele suprime o sono REM, fase essencial para sonhar.</div>
     </div>
-
     <div class="divider"></div>
     <div style="font-family: 'Cormorant Garamond', serif; font-style:italic; font-size:15px; color: rgba(200,191,224,0.4); text-align:center; padding-bottom:8px;">
       "Os sonhos são a estrada real para o inconsciente." — Sigmund Freud
@@ -265,7 +227,6 @@
 
 </div>
 
-<!-- Barra de navegação inferior -->
 <div class="bottom-nav">
   <button class="bnav-btn active" onclick="showPage('interpret',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -294,7 +255,6 @@
 </div>
 
 <script>
-
 (function createStars() {
   const container = document.getElementById('stars');
   for (let i = 0; i < 120; i++) {
@@ -313,22 +273,13 @@
   }
 })();
 
-const API_BASE = 'https://virtual-dream-backend.onrender.com';
+const RAG_BASE = 'https://virtual-dream-rag.onrender.com';
 
-let selectedMood = '';
-let selectedVertente = 'junguiana';
+let selectedVertente = 'jung';
 
-document.querySelectorAll('.mood-chip[data-mood]').forEach(btn => {
+document.querySelectorAll('.chip[data-vertente]').forEach(btn => {
   btn.addEventListener('click', function () {
-    document.querySelectorAll('.mood-chip[data-mood]').forEach(b => b.classList.remove('selected'));
-    this.classList.add('selected');
-    selectedMood = this.dataset.mood;
-  });
-});
-
-document.querySelectorAll('.mood-chip[data-vertente]').forEach(btn => {
-  btn.addEventListener('click', function () {
-    document.querySelectorAll('.mood-chip[data-vertente]').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.chip[data-vertente]').forEach(b => b.classList.remove('selected'));
     this.classList.add('selected');
     selectedVertente = this.dataset.vertente;
   });
@@ -378,33 +329,28 @@ async function interpretDream() {
   startLoading();
 
   try {
-    const interpretRes = await fetch(`${API_BASE}/public/interpret`, {
+    const res = await fetch(`${RAG_BASE}/interpret`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        dream_text: input,
-        vertente: selectedVertente
+        dream: input,
+        vertente: selectedVertente,
+        length: 'short'
       })
     });
 
-    if (!interpretRes.ok) {
-      const err = await interpretRes.json().catch(() => ({}));
-      throw new Error(err.detail || `Erro na interpretação (${interpretRes.status})`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Erro ${res.status}`);
     }
 
-    const result = await interpretRes.json();
-
+    const result = await res.json();
     stopLoading();
 
-    document.getElementById('result-text').textContent = result.content;
+    document.getElementById('result-text').textContent = result.interpretation;
 
-    const symbols = {
-      Sereno:'🌸', Ansioso:'🌊', Assustado:'⚡', Maravilhado:'✨',
-      Triste:'🌧️', Confuso:'🌀', Feliz:'🌞', Neutro:'🌙'
-    };
-    document.getElementById('result-symbol').textContent = symbols[selectedMood] || '🌙';
+    const vertenteSymbol = { jung: '🔮', freud: '🛋️', esoterismo: '🌙' };
+    document.getElementById('result-symbol').textContent = vertenteSymbol[selectedVertente] || '🌙';
 
     const tags = extractTags(input);
     document.getElementById('result-meta').innerHTML =
@@ -415,9 +361,8 @@ async function interpretDream() {
 
     window.lastInterpretation = {
       dream: input,
-      mood: selectedMood,
       vertente: selectedVertente,
-      result: result.content,
+      result: result.interpretation,
       date: new Date()
     };
 
@@ -426,23 +371,6 @@ async function interpretDream() {
     showError('Não foi possível conectar ao oráculo. Verifique sua conexão e tente novamente.');
     console.error(err);
   }
-}
-
-function renderResult(text, input) {
-  document.getElementById('result-text').textContent = text;
-
-  const symbols = {
-    Sereno:'🌸', Ansioso:'🌊', Assustado:'⚡', Maravilhado:'✨',
-    Triste:'🌧️', Confuso:'🌀', Feliz:'🌞', Neutro:'🌙'
-  };
-  document.getElementById('result-symbol').textContent = symbols[selectedMood] || '🌙';
-
-  const tags = extractTags(input);
-  document.getElementById('result-meta').innerHTML =
-    tags.map(t => `<span class="meta-tag">${t}</span>`).join('');
-
-  document.getElementById('result-card').classList.add('show');
-  document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function extractTags(text) {
@@ -460,9 +388,8 @@ function extractTags(text) {
     if (lower.includes(kw) && !found.includes(label)) found.push(label);
     if (found.length >= 4) break;
   }
-  const vertenteTag = selectedVertente === 'junguiana' ? '🔮 Junguiana' : '🛋️ Freudiana';
-  if (selectedMood) found.unshift('😌 ' + selectedMood);
-  found.push(vertenteTag);
+  const vertenteTag = { jung: '🔮 Junguiana', freud: '🛋️ Freudiana', esoterismo: '🌙 Esotérica' };
+  found.push(vertenteTag[selectedVertente] || '🔮 Junguiana');
   return found.slice(0, 5);
 }
 
@@ -499,17 +426,14 @@ function renderDiary() {
     </div>`;
     return;
   }
-  const moodIcons = {
-    Sereno:'😌', Ansioso:'😰', Assustado:'😨', Maravilhado:'🤩',
-    Triste:'😢', Confuso:'😵', Feliz:'😊', Neutro:'😶'
-  };
+  const vertenteIcon = { jung: '🔮', freud: '🛋️', esoterismo: '🌙' };
   list.innerHTML = dreams.map((d, i) => {
     const date = new Date(d.date);
     const formatted = date.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
     return `<div class="dream-entry" onclick="showEntry(${i})">
       <div class="entry-date">${formatted.toUpperCase()}</div>
       <div class="entry-preview">${d.dream}</div>
-      <div class="entry-mood">${moodIcons[d.mood] || '🌙'}</div>
+      <div class="entry-vertente">${vertenteIcon[d.vertente] || '🌙'}</div>
     </div>`;
   }).join('');
 }
@@ -520,29 +444,20 @@ function showEntry(i) {
   if (!d) return;
   window.lastInterpretation = d;
   document.getElementById('dream-input').value = d.dream;
-  selectedMood = d.mood;
-  selectedVertente = d.vertente ?? 'junguiana';
+  selectedVertente = d.vertente ?? 'jung';
 
-  document.querySelectorAll('.mood-chip[data-mood]').forEach(b => {
-    b.classList.toggle('selected', b.dataset.mood === d.mood);
-  });
-  document.querySelectorAll('.mood-chip[data-vertente]').forEach(b => {
+  document.querySelectorAll('.chip[data-vertente]').forEach(b => {
     b.classList.toggle('selected', b.dataset.vertente === selectedVertente);
   });
 
   document.getElementById('result-text').textContent = d.result;
-  const symbols = {
-    Sereno:'🌸', Ansioso:'🌊', Assustado:'⚡', Maravilhado:'✨',
-    Triste:'🌧️', Confuso:'🌀', Feliz:'🌞', Neutro:'🌙'
-  };
-  document.getElementById('result-symbol').textContent = symbols[d.mood] || '🌙';
+  const vertenteSymbol = { jung: '🔮', freud: '🛋️', esoterismo: '🌙' };
+  document.getElementById('result-symbol').textContent = vertenteSymbol[d.vertente] || '🌙';
   document.getElementById('result-meta').innerHTML = '';
   document.getElementById('result-card').classList.add('show');
   showPage('interpret', document.querySelector('.bnav-btn'));
 }
-
 </script>
 
 </body>
-
 </html>
