@@ -115,6 +115,11 @@
   .section-title { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; opacity: 0.7; }
   .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(123,94,167,0.3), transparent); margin: 20px 0; }
 
+
+  .dream-image-container { margin: 16px 0; border-radius: 16px; overflow: hidden; border: 1px solid rgba(123,94,167,0.3); display: none; }
+  .dream-image-container.show { display: block; }
+  .dream-image { width: 100%; display: block; }
+  .image-loading { text-align: center; padding: 24px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: var(--silver); opacity: 0.6; }
   .error-msg { background: rgba(180,60,80,0.15); border: 1px solid rgba(180,60,80,0.3); border-radius: 12px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #e89aab; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
 </style>
@@ -178,6 +183,9 @@
         <div>
           <div class="result-title">INTERPRETAÇÃO DO SONHO</div>
         </div>
+      </div>
+      <div class="dream-image-container" id="dream-image-container">
+        <img class="dream-image" id="dream-image" src="" alt="Visualização do sonho">
       </div>
       <div class="result-text" id="result-text"></div>
       <div class="result-meta" id="result-meta"></div>
@@ -273,8 +281,10 @@
   }
 })();
 
+// ─── API ───────────────────────────────────────────────────────────────────
 const RAG_BASE = 'https://virtual-dream-rag.onrender.com';
 
+// ─── Estado ────────────────────────────────────────────────────────────────
 let selectedVertente = 'jung';
 
 document.querySelectorAll('.chip[data-vertente]').forEach(btn => {
@@ -293,6 +303,7 @@ function showPage(id, btn) {
   if (id === 'diary') renderDiary();
 }
 
+// ─── Loading ───────────────────────────────────────────────────────────────
 const loadingMessages = [
   'Consultando os astros...',
   'Decifrando os símbolos oníricos...',
@@ -319,6 +330,7 @@ function stopLoading() {
   document.getElementById('btn-interpret').disabled = false;
 }
 
+// ─── Interpretar ───────────────────────────────────────────────────────────
 async function interpretDream() {
   const input = document.getElementById('dream-input').value.trim();
   if (!input || input.length < 20) {
@@ -347,6 +359,7 @@ async function interpretDream() {
     const result = await res.json();
     stopLoading();
 
+    // Campo "interpretation" conforme schema do RAG service
     document.getElementById('result-text').textContent = result.interpretation;
 
     const vertenteSymbol = { jung: '🔮', freud: '🛋️', esoterismo: '🌙' };
@@ -373,6 +386,7 @@ async function interpretDream() {
   }
 }
 
+// ─── Tags ──────────────────────────────────────────────────────────────────
 function extractTags(text) {
   const keywords = [
     ['voar','✈️ Voo'], ['água','💧 Água'], ['mar','🌊 Mar'], ['rio','💧 Rio'],
@@ -399,6 +413,7 @@ function showError(msg) {
   el.classList.add('show');
 }
 
+// ─── Diário ────────────────────────────────────────────────────────────────
 function saveDream() {
   if (!window.lastInterpretation) return;
   const dreams = JSON.parse(localStorage.getItem('morpheus-dreams') || '[]');
@@ -450,6 +465,14 @@ function showEntry(i) {
     b.classList.toggle('selected', b.dataset.vertente === selectedVertente);
   });
 
+  const imgContainer = document.getElementById('dream-image-container');
+  if (d.image_url) {
+    const imgEl = document.getElementById('dream-image');
+    imgEl.src = d.image_url;
+    imgEl.onload = () => imgContainer.classList.add('show');
+  } else {
+    imgContainer.classList.remove('show');
+  }
   document.getElementById('result-text').textContent = d.result;
   const vertenteSymbol = { jung: '🔮', freud: '🛋️', esoterismo: '🌙' };
   document.getElementById('result-symbol').textContent = vertenteSymbol[d.vertente] || '🌙';
