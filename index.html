@@ -120,6 +120,9 @@
   .dream-image-container.show { display: block; }
   .dream-image { width: 100%; display: block; }
 
+  .graph-empty { text-align: center; padding: 60px 20px; opacity: 0.5; }
+  #dream-graph { border-radius: 16px; background: rgba(26,19,48,0.6); border: 1px solid rgba(123,94,167,0.2); }
+
   .error-msg { background: rgba(180,60,80,0.15); border: 1px solid rgba(180,60,80,0.3); border-radius: 12px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #e89aab; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
 </style>
@@ -193,6 +196,16 @@
     </div>
   </div>
 
+  <!-- PÁGINA: Mapa -->
+  <div class="page" id="page-graph">
+    <div class="section-title">✦ Mapa dos Sonhos</div>
+    <div class="graph-empty" id="graph-empty">
+      <div class="diary-empty-icon">🕸️</div>
+      <div class="diary-empty-text">Salve ao menos dois sonhos<br>para revelar as conexões...</div>
+    </div>
+    <canvas id="dream-graph" style="display:none; width:100%; touch-action:none;"></canvas>
+  </div>
+
   <!-- PÁGINA: Diário -->
   <div class="page" id="page-diary">
     <div class="section-title">✦ Diário dos Sonhos</div>
@@ -254,6 +267,13 @@
     </svg>
     DIÁRIO
   </button>
+  <button class="bnav-btn" onclick="showPage('graph',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/>
+      <line x1="7" y1="11" x2="17" y2="6"/><line x1="7" y1="13" x2="17" y2="18"/>
+    </svg>
+    MAPA
+  </button>
   <button class="bnav-btn" onclick="showPage('tips',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -301,6 +321,7 @@ function showPage(id, btn) {
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'diary') renderDiary();
+  if (id === 'graph') buildGraph();
 }
 
 // ─── Loading ───────────────────────────────────────────────────────────────
@@ -396,6 +417,18 @@ async function interpretDream() {
       }
     }).catch(() => {});
 
+    // Tags semânticas em background
+    fetch(`${RAG_BASE}/tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dream: input, interpretation: result.interpretation })
+    }).then(r => r.ok ? r.json() : null).then(data => {
+      if (data?.tags?.length) {
+        if (window.lastInterpretation) window.lastInterpretation.semantic_tags = data.tags;
+        renderSemanticTags(data.tags);
+      }
+    }).catch(() => {});
+
   } catch (err) {
     stopLoading();
     showError('Não foi possível conectar ao oráculo. Verifique sua conexão e tente novamente.');
@@ -446,6 +479,197 @@ function saveDream() {
     btn.style.borderColor = '';
     btn.style.color = '';
   }, 2500);
+}
+
+function renderSemanticTags(tags) {
+  const meta = document.getElementById('result-meta');
+  const existing = Array.from(meta.querySelectorAll('.meta-tag')).map(el => el.textContent);
+  tags.forEach(tag => {
+    if (!existing.includes(tag)) {
+      const span = document.createElement('span');
+      span.className = 'meta-tag';
+      span.textContent = tag;
+      meta.appendChild(span);
+    }
+  });
+}
+
+function buildGraph() {
+  const dreams = JSON.parse(localStorage.getItem('morpheus-dreams') || '[]')
+    .filter(d => d.semantic_tags?.length);
+
+  const empty = document.getElementById('graph-empty');
+  const canvas = document.getElementById('dream-graph');
+
+  if (dreams.length < 2) {
+    empty.style.display = 'block';
+    canvas.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  canvas.style.display = 'block';
+
+  const W = canvas.parentElement.clientWidth - 32;
+  const H = Math.min(W * 1.1, window.innerHeight * 0.65);
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Nodes
+  const nodes = dreams.map((d, i) => {
+    const date = new Date(d.date);
+    const label = date.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    return { id: i, label, tags: d.semantic_tags, dream: d.dream, x: 0, y: 0, vx: 0, vy: 0 };
+  });
+
+  // Edges: shared tags
+  const edges = [];
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const shared = nodes[i].tags.filter(t => nodes[j].tags.includes(t));
+      if (shared.length > 0) edges.push({ a: i, b: j, shared, weight: shared.length });
+    }
+  }
+
+  // Layout: force-directed (simple)
+  nodes.forEach((n, i) => {
+    const angle = (2 * Math.PI * i) / nodes.length;
+    n.x = W / 2 + Math.cos(angle) * W * 0.3;
+    n.y = H / 2 + Math.sin(angle) * H * 0.3;
+  });
+
+  function simulate() {
+    for (let iter = 0; iter < 120; iter++) {
+      // Repulsion
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+          const force = 2800 / (dist * dist);
+          nodes[i].vx -= force * dx / dist;
+          nodes[i].vy -= force * dy / dist;
+          nodes[j].vx += force * dx / dist;
+          nodes[j].vy += force * dy / dist;
+        }
+      }
+      // Attraction on edges
+      edges.forEach(e => {
+        const a = nodes[e.a], b = nodes[e.b];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+        const ideal = 120;
+        const force = (dist - ideal) * 0.04;
+        a.vx += force * dx / dist; a.vy += force * dy / dist;
+        b.vx -= force * dx / dist; b.vy -= force * dy / dist;
+      });
+      // Center gravity
+      nodes.forEach(n => {
+        n.vx += (W/2 - n.x) * 0.008;
+        n.vy += (H/2 - n.y) * 0.008;
+      });
+      // Apply + dampen + clamp
+      const pad = 40;
+      nodes.forEach(n => {
+        n.x = Math.max(pad, Math.min(W - pad, n.x + n.vx));
+        n.y = Math.max(pad, Math.min(H - pad, n.y + n.vy));
+        n.vx *= 0.7; n.vy *= 0.7;
+      });
+    }
+  }
+  simulate();
+
+  function draw(hoveredEdge, hoveredNode) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Edges
+    edges.forEach(e => {
+      const a = nodes[e.a], b = nodes[e.b];
+      const isHov = hoveredEdge === e;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = isHov ? 'rgba(212,168,66,0.9)' : `rgba(123,94,167,${0.15 + e.weight * 0.15})`;
+      ctx.lineWidth = isHov ? 2 : e.weight;
+      ctx.stroke();
+
+      if (isHov) {
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        const label = e.shared.join(', ');
+        ctx.font = '11px Lato, sans-serif';
+        const tw = ctx.measureText(label).width;
+        ctx.fillStyle = 'rgba(10,8,18,0.85)';
+        ctx.fillRect(mx - tw/2 - 6, my - 16, tw + 12, 22);
+        ctx.fillStyle = '#d4a842';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, mx, my);
+      }
+    });
+
+    // Nodes
+    nodes.forEach((n, i) => {
+      const isHov = hoveredNode === n;
+      const r = isHov ? 22 : 18;
+      const grd = ctx.createRadialGradient(n.x, n.y, 2, n.x, n.y, r);
+      grd.addColorStop(0, isHov ? 'rgba(212,168,66,0.9)' : 'rgba(123,94,167,0.8)');
+      grd.addColorStop(1, isHov ? 'rgba(212,168,66,0.2)' : 'rgba(26,19,48,0.6)');
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      ctx.strokeStyle = isHov ? 'rgba(212,168,66,0.8)' : 'rgba(200,191,224,0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.font = `bold 10px Lato, sans-serif`;
+      ctx.fillStyle = isHov ? '#d4a842' : 'rgba(232,226,244,0.9)';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.label, n.x, n.y + r + 13);
+
+      if (isHov) {
+        const preview = n.dream.slice(0, 50) + '…';
+        ctx.font = '10px Lato, sans-serif';
+        const tw = ctx.measureText(preview).width;
+        ctx.fillStyle = 'rgba(10,8,18,0.85)';
+        ctx.fillRect(n.x - tw/2 - 6, n.y - r - 28, tw + 12, 20);
+        ctx.fillStyle = '#e8e2f4';
+        ctx.fillText(preview, n.x, n.y - r - 13);
+      }
+    });
+  }
+
+  draw(null, null);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * (W / rect.width), y: (src.clientY - rect.top) * (H / rect.height) };
+  }
+
+  function findHovered(px, py) {
+    let hNode = null, hEdge = null;
+    nodes.forEach(n => { if (Math.hypot(px - n.x, py - n.y) < 24) hNode = n; });
+    if (!hNode) {
+      edges.forEach(e => {
+        const a = nodes[e.a], b = nodes[e.b];
+        const len = Math.hypot(b.x - a.x, b.y - a.y);
+        const t = Math.max(0, Math.min(1, ((px-a.x)*(b.x-a.x)+(py-a.y)*(b.y-a.y))/(len*len)));
+        const d = Math.hypot(px - (a.x + t*(b.x-a.x)), py - (a.y + t*(b.y-a.y)));
+        if (d < 12) hEdge = e;
+      });
+    }
+    return { hNode, hEdge };
+  }
+
+  canvas.onmousemove = canvas.ontouchmove = (e) => {
+    e.preventDefault();
+    const { x, y } = getPos(e);
+    const { hNode, hEdge } = findHovered(x, y);
+    canvas.style.cursor = (hNode || hEdge) ? 'pointer' : 'default';
+    draw(hEdge, hNode);
+  };
+  canvas.onmouseleave = () => draw(null, null);
 }
 
 function renderDiary() {
