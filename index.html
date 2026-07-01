@@ -116,10 +116,10 @@
   .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(123,94,167,0.3), transparent); margin: 20px 0; }
 
 
-  .dream-image-container { margin: 16px 0; border-radius: 16px; overflow: hidden; border: 1px solid rgba(123,94,167,0.3); display: none; }
+  .dream-image-container { margin-bottom: 16px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(123,94,167,0.3); display: none; }
   .dream-image-container.show { display: block; }
   .dream-image { width: 100%; display: block; }
-  .image-loading { text-align: center; padding: 24px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: var(--silver); opacity: 0.6; }
+
   .error-msg { background: rgba(180,60,80,0.15); border: 1px solid rgba(180,60,80,0.3); border-radius: 12px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #e89aab; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
 </style>
@@ -376,8 +376,25 @@ async function interpretDream() {
       dream: input,
       vertente: selectedVertente,
       result: result.interpretation,
+      image_url: null,
       date: new Date()
     };
+
+    // Imagem em background
+    fetch(`${RAG_BASE}/generate_image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dream: input, interpretation: result.interpretation })
+    }).then(r => r.ok ? r.json() : null).then(imgData => {
+      if (imgData?.image_url) {
+        const imgEl = document.getElementById('dream-image');
+        imgEl.src = imgData.image_url;
+        imgEl.onload = () => {
+          document.getElementById('dream-image-container').classList.add('show');
+          if (window.lastInterpretation) window.lastInterpretation.image_url = imgData.image_url;
+        };
+      }
+    }).catch(() => {});
 
   } catch (err) {
     stopLoading();
@@ -483,4 +500,4 @@ function showEntry(i) {
 </script>
 
 </body>
-</html> 
+</html>
